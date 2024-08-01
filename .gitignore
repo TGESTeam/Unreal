@@ -1,13 +1,16 @@
 # Do not ignore .gitignore and .git directory
+*
+
+
 !.gitignore
 
 
 # Do not ignore the Source folder
-# !Source/
+!Source/
 
 # Do not ignore the UnrealClient/Content/Resource folder
 # !UnrealClient/Content/
-# !UnrealClient/Content/Resource/
+!UnrealClient/Content/Resource/resourse_dirve_url.txt
 !README.md
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,unrealengine,c++
