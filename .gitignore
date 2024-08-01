@@ -11,6 +11,8 @@
 !UnrealClient/Content/Resource/resourse_dirve_url.txt
 !README.md
 
+/Config
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,unrealengine,c++
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,unrealengine,c++
 
