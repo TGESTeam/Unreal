@@ -1,0 +1,41 @@
+# Ignore everything
+*
+
+# Do not ignore .gitignore and .git directory
+!.gitignore
+!.git
+
+# Do not ignore the Source folder
+!Source/
+
+# Do not ignore the UnrealClient/Content/Resource folder
+!UnrealClient/Content/
+!UnrealClient/Content/Resource/
+!README.md
+
+
+# Binaries
+# DerivedDataCache
+# Intermediate
+# Saved
+# .vscode
+# .vs
+# *.VC.db
+# *.opensdf
+# *.opendb
+# *.sdf
+# *.sln
+# *.suo
+# *.xcodeproj
+# *.xcworkspace
+
+# # Ignore everything
+# *
+
+# # Do not ignore .gitignore and .git directory
+# !.gitignore
+# !.git
+
+# # Do not ignore the Source folder
+# !Source/
+# !README.md
