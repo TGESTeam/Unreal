@@ -40,6 +40,18 @@ void AUnrealClientCharacter::BeginPlay()
 
 	// ProtocolLibrary 싱글톤 인스턴스 가져오기
 	ProtocolLibraryInstance = AProtocolLibrary::GetInstance(GetWorld());
+	if (!ProtocolLibraryInstance)
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("Failed to get ProtocolLibrary instance."));
+	}
+}
+
+void AUnrealClientCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// 게임 종료 시 싱글톤 인스턴스 해제
+	AProtocolLibrary::DestroyInstance();
 }
 
 void AUnrealClientCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -98,15 +110,26 @@ void AUnrealClientCharacter::Tick(float DeltaTime)
 		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 		if (PlayerCharacter)
 		{
+			//Player Location
 			FVector PlayerLocation = PlayerCharacter->GetActorLocation();
 
-			// ProtocolLibrary 싱글톤 인스턴스의 LOVector 값 변경
+			//ProtocolLibrary singleton instance LOVector change Value
 			ProtocolLibraryInstance->PlayerLocation.X = PlayerLocation.X;
 			ProtocolLibraryInstance->PlayerLocation.Y = PlayerLocation.Y;
 			ProtocolLibraryInstance->PlayerLocation.Z = PlayerLocation.Z;
 
+			//PlayerViewdirection
+			FRotator PlayerDirection = PlayerCharacter->GetActorRotation();
+			//ProtocolLibrary singleton instance ROVector change Value
+			ProtocolLibraryInstance->PlayerViewDirection.Pitch = PlayerDirection.Pitch;
+			ProtocolLibraryInstance->PlayerViewDirection.Yaw = PlayerDirection.Yaw;
+			ProtocolLibraryInstance->PlayerViewDirection.Roll = PlayerDirection.Roll;
 
 			/*UE_LOG(LogTemp, Log, TEXT("Player Location Updated: %lf, %lf, %lf"), PlayerLocation.X, PlayerLocation.Y, PlayerLocation.Z);*/
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("ProtocolLibraryInstance is null."));
 	}
 }
