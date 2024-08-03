@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "UnrealClientCharacter.h"
 #include "UnrealClientProjectile.h"
 #include "Animation/AnimInstance.h"
@@ -10,18 +8,16 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "ProtocolLibrary.h"
 #include <Kismet/GameplayStatics.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
-
-//////////////////////////////////////////////////////////////////////////
-// AUnrealClientCharacter
 
 AUnrealClientCharacter::AUnrealClientCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
-		
+
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
@@ -34,21 +30,32 @@ AUnrealClientCharacter::AUnrealClientCharacter()
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
-	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
-
 }
 
 void AUnrealClientCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	// ProtocolLibrary 싱글톤 인스턴스 가져오기
+	ProtocolLibraryInstance = AProtocolLibrary::GetInstance(GetWorld());
+	if (!ProtocolLibraryInstance)
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("Failed to get ProtocolLibrary instance."));
+	}
 }
 
-//////////////////////////////////////////////////////////////////////////// Input
+void AUnrealClientCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// 게임 종료 시 싱글톤 인스턴스 해제
+	AProtocolLibrary::DestroyInstance();
+}
 
 void AUnrealClientCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{	
+{
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
@@ -67,7 +74,6 @@ void AUnrealClientCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
-
 
 void AUnrealClientCharacter::Move(const FInputActionValue& Value)
 {
@@ -95,26 +101,35 @@ void AUnrealClientCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AUnrealClientCharacter::Tick(float DeltaTime) {
-	/*
-	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
-	if (PlayerCharacter)
+void AUnrealClientCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (ProtocolLibraryInstance)
 	{
-		FVector PlayerLocation = PlayerCharacter->GetActorLocation();
-		UE_LOG(LogTemp, Log, TEXT("Player Location: %lf"), PlayerLocation.X);
-		UE_LOG(LogTemp, Log, TEXT("Player Location: %lf"), PlayerLocation.Y);
-		UE_LOG(LogTemp, Log, TEXT("Player Location: %lf"), PlayerLocation.Z);
-	}*/
+		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+		if (PlayerCharacter)
+		{
+			//Player Location
+			FVector PlayerLocation = PlayerCharacter->GetActorLocation();
 
-	// [소스코드의 Tick()안에 두면 매초마다 사용자의 위치를 받을수있다.]
-	//ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
-	//if (PlayerCharacter)
-	//{
-	//	//FVector PlayerLocation = PlayerCharacter->GetActorLocation();
-	//	//UE_LOG(LogTemp, Log, TEXT("Player Location: %d"), sizeof(*PlayerLocation.X));
+			//ProtocolLibrary singleton instance LOVector change Value
+			ProtocolLibraryInstance->PlayerLocation.X = PlayerLocation.X;
+			ProtocolLibraryInstance->PlayerLocation.Y = PlayerLocation.Y;
+			ProtocolLibraryInstance->PlayerLocation.Z = PlayerLocation.Z;
 
-	//	// 플레이어 캐릭터의 방향을 얻기
-	//	FRotator PlayerDirection = PlayerCharacter->GetActorRotation();
-	//	UE_LOG(LogTemp, Log, TEXT("Player Direction: Pitch=%lf, Yaw=%lf, Roll=%lf"), PlayerDirection.Pitch, PlayerDirection.Yaw, PlayerDirection.Roll);
-	//}
+			//PlayerViewdirection
+			FRotator PlayerDirection = PlayerCharacter->GetActorRotation();
+			//ProtocolLibrary singleton instance ROVector change Value
+			ProtocolLibraryInstance->PlayerViewDirection.Pitch = PlayerDirection.Pitch;
+			ProtocolLibraryInstance->PlayerViewDirection.Yaw = PlayerDirection.Yaw;
+			ProtocolLibraryInstance->PlayerViewDirection.Roll = PlayerDirection.Roll;
+
+			/*UE_LOG(LogTemp, Log, TEXT("Player Location Updated: %lf, %lf, %lf"), PlayerLocation.X, PlayerLocation.Y, PlayerLocation.Z);*/
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Warning, TEXT("ProtocolLibraryInstance is null."));
+	}
 }
