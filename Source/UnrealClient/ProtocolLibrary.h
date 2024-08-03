@@ -15,6 +15,18 @@ class UNREALCLIENT_API AProtocolLibrary : public AActor
 public:
 	// Sets default values for this actor's properties
 	AProtocolLibrary();
+	~AProtocolLibrary();
+	
+	// Enum
+	enum SeperatorEnum
+	{ // 0~6
+		LO,
+		RO,
+		VL,
+		TI,
+		SH,
+		PV
+	};
 
 	//변수
 	struct LOVector {
@@ -23,11 +35,24 @@ public:
 		double Z;
 	};
 
+	struct ROVector {
+		double Pitch;
+		double Yaw;
+		double Roll;
+	};
+
 	LOVector PlayerLocation;
 
+	ROVector PlayerViewDirection;
 
-	// PlayerLocation 값을 출력하는 함수
+	//now Time
+	FDateTime CurrentTime;
+
+	// PlayerLocation value print - 
 	void PrintPlayerLocation() const;
+
+	//PlayerViewDirection value print -
+	void PrintPlayerViewDirection() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -46,8 +71,19 @@ private:
 	FSocket* Socket;
 	FString PendingSendData;
 
+	//2second 
+	float ElapsedTime;
+
 public:
-	// 싱글톤 인스턴스를 반환하는 함수
+	// singleton return
 	static AProtocolLibrary* GetInstance(UWorld* World);
+
+	// singleton Destory
+	static void DestroyInstance();
+
+
+
+	// now time + 0.1s
+	FDateTime AddTime(FDateTime Time, float Seconds);
 
 };
