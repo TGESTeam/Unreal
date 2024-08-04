@@ -2,8 +2,11 @@
 #include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Misc/DateTime.h" //Time 
+#include "HAL/PlatformProcess.h" // For FPlatformProcess::Sleep
 
 AProtocolLibrary* AProtocolLibrary::Instance = nullptr;
+bool bFirstTick = true;
+int32 ActualBufferSize = 1048576; // 초기값 설정
 
 // 현재 시간에 0.1초를 더하는 메서드
 FDateTime AProtocolLibrary::AddTime(FDateTime Time, float Seconds)
@@ -17,7 +20,12 @@ AProtocolLibrary::AProtocolLibrary()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 소켓 초기화
-	//Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("default"), false);
+	Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("default"), false);
+	
+	int32 BufferSize = 1048576; // 예시로 1MB 설정
+	Socket->SetReceiveBufferSize(BufferSize, ActualBufferSize);
+	UE_LOG(LogTemp, Log, TEXT("Attempted to set receive buffer size to: %d"), BufferSize);
+	UE_LOG(LogTemp, Log, TEXT("Actual receive buffer size set to: %d"), ActualBufferSize);
 }
 
 AProtocolLibrary::~AProtocolLibrary()
@@ -52,7 +60,20 @@ void AProtocolLibrary::BeginPlay()
 	}
 
 	// 서버에 연결 시도
-	//ConnectToServer(TEXT("127.0.0.1"), 12345);
+	ConnectToServer(TEXT("127.0.0.1"), 12345);
+
+	// 대기 시간 추가 (2초)
+	//FPlatformProcess::Sleep(2.0f);
+
+	// 서버가 준비되었는지 확인
+	if (Socket && Socket->GetConnectionState() == SCS_Connected)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Socket is connected and ready to send data."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Socket is not connected or ready."));
+	}
 }
 
 // 싱글톤 인스턴스를 반환하는 함수
@@ -75,15 +96,23 @@ void AProtocolLibrary::DestroyInstance()
 	}
 }
 
-
-
 // Called every frame
 void AProtocolLibrary::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 첫 번째 Tick에서 2초 대기
+	//if (bFirstTick)
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("Waiting for 2 seconds before first data send..."));
+	//	FPlatformProcess::Sleep(1.0f);
+	//	bFirstTick = false;
+	//}
+
+
+
 	ElapsedTime += DeltaTime;
-	if (ElapsedTime >= 2.0f)
+	if (ElapsedTime >= 2.0f )
 	{
 		ElapsedTime = 0.0f;
 
@@ -109,7 +138,20 @@ void AProtocolLibrary::Tick(float DeltaTime)
 		CurrentTime = AddTime(CurrentTime, 0.1);
 		string += *CurrentTime.ToString();
 
-		UE_LOG(LogTemp, Log, TEXT("parse string : %s"), *string);
+		UE_LOG(LogTemp, Log, TEXT("send reuest: %s"), *string);
+		SendData(string);
+
+		//// 첫 번째 요청 후 응답 대기
+		//if (bFirstTick)
+		//{
+		//	UE_LOG(LogTemp, Log, TEXT("Waiting for response after first data send..."));
+		//	FPlatformProcess::Sleep(5.0f);
+		//	bFirstTick = false;
+		//}
+
+		FString Response = ReceiveData();
+		//UE_LOG(LogTemp, Log, TEXT("parse string : %s"), *string);
+		UE_LOG(LogTemp, Log, TEXT("Received response: %s"), *Response);
 	}
 
 	// PlayerLocation value print -
@@ -178,22 +220,49 @@ void AProtocolLibrary::SendData(const FString& Data)
 	}
 }
 
+
 FString AProtocolLibrary::ReceiveData()
 {
 	if (!Socket) return FString();
+	UE_LOG(LogTemp, Error, TEXT("Here"));
 
 	TArray<uint8> ReceivedData;
-	uint32 Size;
-	while (Socket->HasPendingData(Size))
-	{
-		ReceivedData.SetNumUninitialized(FMath::Min(Size, 65507u));
+	ReceivedData.SetNumUninitialized(ActualBufferSize);
 
-		int32 Read = 0;
-		Socket->Recv(ReceivedData.GetData(), ReceivedData.Num(), Read);
+	int32 TotalBytesRead = 0;
+	int32 BytesRead = 0;
+	const float Timeout = 5.0f; // 최대 대기 시간 (초)
+	const float PollInterval = 0.1f; // 폴링 간격 (초)
+	float TimeWaited = 0.0f;
+
+	// 소켓을 넌블로킹 모드로 설정
+	Socket->SetNonBlocking(true);
+
+	while (TimeWaited < Timeout)
+	{
+		BytesRead = 0;
+		bool bRecv = Socket->Recv(ReceivedData.GetData() + TotalBytesRead, ActualBufferSize - TotalBytesRead, BytesRead, ESocketReceiveFlags::None);
+		if (bRecv && BytesRead > 0)
+		{
+			TotalBytesRead += BytesRead;
+			break; // 데이터를 받으면 루프 종료
+		}
+
+		FPlatformProcess::Sleep(PollInterval);
+		TimeWaited += PollInterval;
 	}
 
-	FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
-	return ReceivedString;
+	// 소켓을 다시 블로킹 모드로 설정
+	Socket->SetNonBlocking(false);
+
+	if (TotalBytesRead > 0)
+	{
+		FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
+		UE_LOG(LogTemp, Warning, TEXT("string cut!"));
+		return ReceivedString.Left(TotalBytesRead);  // 실제 수신된 데이터 크기에 맞게 문자열 잘라내기
+	}
+
+	return FString();
 }
 
 void AProtocolLibrary::ParsingSL(FString& ParsedData, const TArray<uint8>& ReceivedData) {
@@ -201,9 +270,9 @@ void AProtocolLibrary::ParsingSL(FString& ParsedData, const TArray<uint8>& Recei
 	int next; // 다음 구분자가 있는 배열의 순번
 	const int ALL_SEPARATOR_LENGTH = 2; // 모든 구분자의 문자는 2글자
 
-	if (ReceiveData.Len() < 0) {
+	/*if (ReceivedData.Len() < 0) {
 		UE_LOG(LogTemplateCharacter, Error, TEXT("---- ReceivedData is empty ----"));
-	}
+	}*/
 
 	// 3-2 - SL이외의 문자가 나올때까지 길이를 받음
 	//    - 2번째 배열부터 검사
@@ -229,4 +298,26 @@ void AProtocolLibrary::ParsingReceiveData(FString& ParsedData, const TArray<uint
 	UE_LOG(LogTemp, Log, TEXT("---------- Now String length: %d | val: %s"), ParsedData.GetAllocatedSize(), *ParsedData);
 }
 
+
+
+
+//FString AProtocolLibrary::ReceiveData()
+//{
+//	if (!Socket) return FString();
+//	UE_LOG(LogTemp, Error, TEXT("Here"));
+//	TArray<uint8> ReceivedData;
+//	uint32 Size;
+//
+//	while (Socket->HasPendingData(Size))
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("Here2"));
+//		ReceivedData.SetNumUninitialized(FMath::Min(Size, (uint32)ActualBufferSize));
+//
+//		int32 Read = 0;
+//		Socket->Recv(ReceivedData.GetData(), ReceivedData.Num(), Read);
+//	}
+//
+//	FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
+//	return ReceivedString;
+//}
 
