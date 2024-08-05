@@ -112,7 +112,7 @@ void AProtocolLibrary::Tick(float DeltaTime)
 
 
 	ElapsedTime += DeltaTime;
-	if (ElapsedTime >= 2.0f || bFirstTick)
+	if (ElapsedTime >= 2.0f )
 	{
 		ElapsedTime = 0.0f;
 
@@ -265,6 +265,40 @@ FString AProtocolLibrary::ReceiveData()
 	return FString();
 }
 
+void AProtocolLibrary::ParsingSL(FString& ParsedData, const TArray<uint8>& ReceivedData) {
+	FString valueOfSL; // SL에서 해석한 길이를 받을 예정
+	int next; // 다음 구분자가 있는 배열의 순번
+	const int ALL_SEPARATOR_LENGTH = 2; // 모든 구분자의 문자는 2글자
+
+	/*if (ReceivedData.Len() < 0) {
+		UE_LOG(LogTemplateCharacter, Error, TEXT("---- ReceivedData is empty ----"));
+	}*/
+
+	// 3-2 - SL이외의 문자가 나올때까지 길이를 받음
+	//    - 2번째 배열부터 검사
+	//	  - 무조건 SL의 길이를 처음에 전부 받고, 이후의 SH의 일부값이 있다고 가정함 
+	for (next = 2; (ReceivedData[next] > 47 && ReceivedData[next] < 58); next++) {
+		valueOfSL.AppendChar(ReceivedData[next]);
+	}
+
+	// 3-3 앞으로 Parsing될 데이터를 담을 FString의 길이를 할당함
+	ParsedData.Reserve(FCString::Atoi(*valueOfSL));
+
+	// 3-4 for문을 통해서 이전의 문자열을 계속 넣어줌
+	ParsingReceiveData(ParsedData, ReceivedData, (next+ALL_SEPARATOR_LENGTH));
+}
+
+// staratNum: 
+void AProtocolLibrary::ParsingReceiveData(FString& ParsedData, const TArray<uint8>& ReceivedData, int startNum) {
+	// 반복문을 통해서 받은 데이터를 ParsedData에 붙임
+	for (uint8 data : ReceivedData) {
+		ParsedData.AppendChar(data);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("---------- Now String length: %d | val: %s"), ParsedData.GetAllocatedSize(), *ParsedData);
+}
+
+
 
 
 //FString AProtocolLibrary::ReceiveData()
@@ -286,3 +320,4 @@ FString AProtocolLibrary::ReceiveData()
 //	FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
 //	return ReceivedString;
 //}
+
