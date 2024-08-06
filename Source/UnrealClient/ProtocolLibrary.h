@@ -45,6 +45,9 @@ public:
 
 	ROVector PlayerViewDirection;
 
+	//SH size
+	TArray<int32> SHArray;  // int32형 요소를 가지는 TArray 선언
+
 	//now Time
 	FDateTime CurrentTime;
 
@@ -65,7 +68,9 @@ public:
 	void ConnectToServer(const FString& ServerAddress, int32 Port);
 	void SendData(const FString& Data);
 	FString ReceiveData();
-	void ParsingSL(FString& ParsedData, const TArray<uint8>& ReceivedData); // SL길이만큼 str 할당 후, 이후의 데이터 해석
+	//void ParsingSL(FString& ParsedData, const TArray<uint8>& ReceivedData);
+	void ParsingSL(FString& ParsedData);
+	// SL길이만큼 str 할당 후, 이후의 데이터 해석
 	void ParsingReceiveData(FString& ParsedData, const TArray<uint8>& ReceivedData, int startNum=0); // uint8 array의 데이터를 String에 붙이는 함수
 
 private:
