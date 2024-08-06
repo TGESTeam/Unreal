@@ -45,7 +45,7 @@ void AUnrealClientCharacter::BeginPlay()
 		UE_LOG(LogTemplateCharacter, Error, TEXT("Failed to get ProtocolLibrary instance."));
 	}
 
-
+	/*
 	// --------- CPP <-- Python으로 데이터 받을 때 SL 해석 테스트 [Start] -----------
 	// 1. 사용자와 연결(가정)
 
@@ -83,7 +83,8 @@ void AUnrealClientCharacter::BeginPlay()
 	// 6. 데이터_담기(모든 문자열이 담길 str, 현재 받은 문자열을 담은 TArray)
 	ProtocolLibraryInstance->ParsingReceiveData(ParsedData, ReceivedData2);
 
-	// --------- CPP <-- Python으로 데이터 받을 때 SL 해석 테스트 [End] -----------
+	 //--------- CPP <-- Python으로 데이터 받을 때 SL 해석 테스트 [End] -----------
+	 */
 }
 
 void AUnrealClientCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
