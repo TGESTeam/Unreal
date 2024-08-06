@@ -44,6 +44,47 @@ void AUnrealClientCharacter::BeginPlay()
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("Failed to get ProtocolLibrary instance."));
 	}
+
+	/*
+	// --------- CPP <-- Python으로 데이터 받을 때 SL 해석 테스트 [Start] -----------
+	// 1. 사용자와 연결(가정)
+
+	// 2. receive를 처음으로 받는다. (while문으로 앞으로 여러번 받을 예정)
+	 //   -> 문자열 형태:"SL50000SH10,50,30,5PV1.333,2.333,3.333,4.4444,5.5555,6.6666"
+	uint8 RawData[] = { // 예시용 데이터
+		83, 76, 53, 48, 48, 48, 48, 83, 72, 49, 48, 44, 53, 48, 44, 51, 48, 44, 53, 80, 86,
+		49, 46, 51, 51, 51, 44, 50, 46, 51, 51, 51, 44, 51, 46, 51, 51, 51, 44, 52, 46, 52,
+		52, 52, 52, 44, 53, 46, 53, 53, 53, 53, 44, 54, 46, 54, 54, 54, 54
+	};
+
+	FString ParsedData;
+	TArray<uint8> ReceivedData; // 예시 데이터를 넣을 Array
+	TArray<uint8> ReceivedData2; // 예시 데이터를 넣을 Array
+
+	// RawData 배열에서 데이터를 TArray에 복사
+	ReceivedData.Append(RawData, sizeof(RawData) / sizeof(uint8));
+
+	// 3. 처음 받은 receive를 ParsingSL(VL 일부를 받을 FString)로 해석
+	ProtocolLibraryInstance -> ParsingSL(ParsedData, ReceivedData);
+	
+
+	// 4. 모든 문자열이 담길 str이 공간이 할당되고, TArray에 있는 데이터가 들어가짐
+	
+	// 5. while문으로 다시 데이터를 받는다.
+	//	  -> 문자열 형태:"5.555,6.666,7.777,8.888,9.999,10.101,11.111,12.121,13.131,14.141,15.151"
+	uint8 RawData2[] = {53, 46, 53, 53, 53, 44, 54, 46, 54, 54, 54, 44, 55, 46, 55, 55, 
+		55, 44, 56, 46, 56, 56, 56, 44, 57, 46, 57, 57, 57, 44, 49, 48, 46, 49, 48, 49, 
+		44, 49, 49, 46, 49, 49, 49, 44, 49, 50, 46, 49, 50, 49, 44, 49, 51, 46, 49, 51, 
+		49, 44, 49, 52, 46, 49, 52, 49, 44, 49, 53, 46, 49, 53, 49
+	};
+	// RawData 배열에서 데이터를 TArray에 복사
+	ReceivedData2.Append(RawData2, sizeof(RawData2) / sizeof(uint8));
+
+	// 6. 데이터_담기(모든 문자열이 담길 str, 현재 받은 문자열을 담은 TArray)
+	ProtocolLibraryInstance->ParsingReceiveData(ParsedData, ReceivedData2);
+
+	 //--------- CPP <-- Python으로 데이터 받을 때 SL 해석 테스트 [End] -----------
+	 */
 }
 
 void AUnrealClientCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
