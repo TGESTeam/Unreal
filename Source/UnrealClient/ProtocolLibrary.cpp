@@ -1,3 +1,6 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
 #include "ProtocolLibrary.h"
 #include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
@@ -21,7 +24,7 @@ AProtocolLibrary::AProtocolLibrary()
 
 	// 소켓 초기화
 	Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("default"), false);
-	
+
 
 	// 최대 버퍼 크기를 찾기 위한 초기값과 증분 설정
 	int32 DesiredBufferSize = 1024 * 1024; // 1MB부터 시작
@@ -448,6 +451,7 @@ void AProtocolLibrary::ParsingReceiveData(FString& ParsedData, const TArray<uint
 
 	UE_LOG(LogTemp, Log, TEXT("---------- Now String length: %d | val: %s"), ParsedData.GetAllocatedSize(), *ParsedData);
 }
+
 
 
 

@@ -10,8 +10,8 @@
 // Sets default values
 AVoxel_one::AVoxel_one()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = true;
 
 
     int32 NumX = 85;
@@ -42,14 +42,14 @@ AVoxel_one::AVoxel_one()
 // Called when the game starts or when spawned
 void AVoxel_one::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
+
 }
 
 // Called every frame
 void AVoxel_one::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
 }
 

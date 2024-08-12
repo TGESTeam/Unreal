@@ -44,8 +44,8 @@ UCLASS()
 class UNREALCLIENT_API ABP_Fire : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ABP_Fire();
 
@@ -53,7 +53,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
