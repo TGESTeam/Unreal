@@ -11,8 +11,8 @@ UCLASS()
 class UNREALCLIENT_API AVoxelManager : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AVoxelManager();
 
@@ -20,23 +20,26 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    // Function to generate voxels
-    void GenerateVoxels();
+	UFUNCTION(BlueprintCallable, Category = "Voxel")
+	void CreateVoxelsInEditor();
 
-    // Voxel class to spawn
-    UPROPERTY(EditAnywhere, Category = "Voxel")
-    TSubclassOf<AVoxel_one> VoxelClass;
 
-    // Number of voxels in each dimension
-    UPROPERTY(EditAnywhere, Category = "Voxel")
-    int32 GridSize = 100;
+	UFUNCTION(BlueprintCallable, Category = "Voxel")
+	void CreateVoxels();
+private:
 
-    // Distance between voxels
-    UPROPERTY(EditAnywhere, Category = "Voxel")
-    float VoxelSpacing = 1.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Voxel Settings")
+	TSubclassOf<class AVoxel_one> VoxelClass;
+
+	UPROPERTY(EditAnywhere, Category = "Voxel Settings")
+	FVector Origin = FVector(-4000.0f, 3000.0f, 0.0f);
+
+	UPROPERTY(EditAnywhere, Category = "Voxel Settings")
+	FVector Dimensions = FVector(1633.0f, 1809.0f, 2014.0f);
 };
+

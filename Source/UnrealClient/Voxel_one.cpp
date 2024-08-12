@@ -6,11 +6,21 @@
 #include "UObject/ConstructorHelpers.h"
 
 
+
 // Sets default values
 AVoxel_one::AVoxel_one()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+
+    int32 NumX = 85;
+    int32 NumY = 93;
+    int32 NumZ = 101;
+
+    // Set default voxel size
+    //VoxelSize = FVector(14.58125f, 14.9976f, 15.2614f);
+    VoxelSize = FVector(Dimensions.X / NumX, Dimensions.Y / NumY, Dimensions.Z / NumZ);
 
     // Create mesh component
     VoxelMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VoxelMesh"));
@@ -23,9 +33,10 @@ AVoxel_one::AVoxel_one()
         VoxelMesh->SetStaticMesh(VoxelMeshAsset.Object);
     }
 
-    // Set the scale to match the desired voxel size
-    VoxelMesh->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
-    //VoxelMesh->SetWorldScale3D(VoxelSize);
+
+    // Calculate scale based on the desired size in cm
+    FVector Scale = VoxelSize / 100.0f;
+    VoxelMesh->SetWorldScale3D(Scale);
 }
 
 // Called when the game starts or when spawned

@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
+#include "GameplayTagsManager.h"
 #include "Voxel_one.generated.h"
+
 
 UCLASS()
 class UNREALCLIENT_API AVoxel_one : public AActor
@@ -14,6 +17,8 @@ class UNREALCLIENT_API AVoxel_one : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AVoxel_one();
+
+	FVector Dimensions = FVector(1633.0f, 1809.0f, 2014.0f);
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,10 +31,15 @@ public:
 
 	// Voxel size
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Voxel")
-	FVector VoxelSize = FVector(1.0f, 1.0f, 1.0f);
+	FVector VoxelSize;
 
 	// Mesh component
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* VoxelMesh;
+
+
+	// Gameplay Tags
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")
+	FGameplayTagContainer GameplayTags;
 
 };
