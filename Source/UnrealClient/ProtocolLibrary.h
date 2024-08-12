@@ -1,3 +1,5 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,6 +8,7 @@
 #include "SocketSubsystem.h"
 #include "Networking.h"
 #include "ProtocolLibrary.generated.h"
+
 
 UCLASS()
 class UNREALCLIENT_API AProtocolLibrary : public AActor
@@ -16,7 +19,7 @@ public:
 	// Sets default values for this actor's properties
 	AProtocolLibrary();
 	~AProtocolLibrary();
-	
+
 	// Enum
 	enum SeperatorEnum
 	{ // 0~6
@@ -71,7 +74,7 @@ public:
 	//void ParsingSL(FString& ParsedData, const TArray<uint8>& ReceivedData);
 	void ParsingSL(FString& ParsedData);
 	// SL길이만큼 str 할당 후, 이후의 데이터 해석
-	void ParsingReceiveData(FString& ParsedData, const TArray<uint8>& ReceivedData, int startNum=0); // uint8 array의 데이터를 String에 붙이는 함수
+	void ParsingReceiveData(FString& ParsedData, const TArray<uint8>& ReceivedData, int startNum = 0); // uint8 array의 데이터를 String에 붙이는 함수
 
 private:
 	static AProtocolLibrary* Instance;
