@@ -1,3 +1,6 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
 #include "ProtocolLibrary.h"
 #include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
@@ -21,7 +24,7 @@ AProtocolLibrary::AProtocolLibrary()
 
 	// 소켓 초기화
 	Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("default"), false);
-	
+
 
 	// 최대 버퍼 크기를 찾기 위한 초기값과 증분 설정
 	int32 DesiredBufferSize = 1024 * 1024; // 1MB부터 시작
@@ -94,21 +97,23 @@ void AProtocolLibrary::BeginPlay()
 	SHArray.Add(30);
 	SHArray.Add(1);
 
-	//// 서버에 연결 시도
-	ConnectToServer(TEXT("127.0.0.1"), 12345);
 
 	//// 대기 시간 추가 (2초)
 	//FPlatformProcess::Sleep(2.0f);
 
-	//// 서버가 준비되었는지 확인
-	if (Socket && Socket->GetConnectionState() == SCS_Connected)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Socket is connected and ready to send data."));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Socket is not connected or ready."));
-	}
+	////// 서버에 연결 시도
+	//ConnectToServer(TEXT("127.0.0.1"), 12345);
+
+
+	////// 서버가 준비되었는지 확인
+	//if (Socket && Socket->GetConnectionState() == SCS_Connected)
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("Socket is connected and ready to send data."));
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("Socket is not connected or ready."));
+	//}
 }
 
 // 싱글톤 인스턴스를 반환하는 함수
@@ -144,71 +149,67 @@ void AProtocolLibrary::Tick(float DeltaTime)
 	//	bFirstTick = false;
 	//}
 
-	ElapsedTime += DeltaTime;
-	if (ElapsedTime >= 0.1f)
-	{
-		ElapsedTime = 0.0f;
 
-		FString string;
-		////1. SH -> VL size -> Vector에서 할당받도록 변경 
-		string += "SH";
-		//string += "2,3,5,5";
-		for (size_t i = 0; i < SHArray.Num(); i++)
-		{
-			// uint16 값을 FString으로 변환하여 문자열에 추가
-			string += FString::Printf(TEXT("%d"), SHArray[i]);
-			if (i < SHArray.Num() - 1)
-			{
-				// 각 값 사이에 쉼표 추가
-				string += ",";
-			}
-		}
-		string += "KI";
-		string += "2";
+	//--------------------------------
+	//ElapsedTime += DeltaTime;
+	//if (ElapsedTime >= 0.1f)
+	//{
+	//	ElapsedTime = 0.0f;
 
-		////2. playLoction -> LO
-		string += "LO";
-		string += FString::Printf(TEXT("%lf"), PlayerLocation.X) + "," \
-			+ FString::Printf(TEXT("%lf"), PlayerLocation.Y) + "," \
-			+ FString::Printf(TEXT("%lf"), PlayerLocation.Z);
-		//3. playViewDirection -> RO
-		string += "RO";
-		string += FString::Printf(TEXT("%lf"), PlayerViewDirection.Pitch) + "," \
-			+ FString::Printf(TEXT("%lf"), PlayerViewDirection.Yaw) + "," \
-			+ FString::Printf(TEXT("%lf"), PlayerViewDirection.Roll);
+	//	FString string;
+	//	////1. SH -> VL size -> Vector에서 할당받도록 변경 
+	//	string += "SH";
+	//	//string += "2,3,5,5";
+	//	for (size_t i = 0; i < SHArray.Num(); i++)
+	//	{
+	//		// uint16 값을 FString으로 변환하여 문자열에 추가
+	//		string += FString::Printf(TEXT("%d"), SHArray[i]);
+	//		if (i < SHArray.Num() - 1)
+	//		{
+	//			// 각 값 사이에 쉼표 추가
+	//			string += ",";
+	//		}
+	//	}
+	//	string += "KI";
+	//	string += "2";
 
-		////4. TI -> TI
-		string += "TI";
-		CurrentTime = FDateTime::UtcNow();
-		CurrentTime = AddTime(CurrentTime, 0.1);
-		string += *CurrentTime.ToString();
+	//	////2. playLoction -> LO
+	//	string += "LO";
+	//	string += FString::Printf(TEXT("%lf"), PlayerLocation.X) + "," \
+	//		+ FString::Printf(TEXT("%lf"), PlayerLocation.Y) + "," \
+	//		+ FString::Printf(TEXT("%lf"), PlayerLocation.Z);
+	//	//3. playViewDirection -> RO
+	//	string += "RO";
+	//	string += FString::Printf(TEXT("%lf"), PlayerViewDirection.Pitch) + "," \
+	//		+ FString::Printf(TEXT("%lf"), PlayerViewDirection.Yaw) + "," \
+	//		+ FString::Printf(TEXT("%lf"), PlayerViewDirection.Roll);
 
-		UE_LOG(LogTemp, Log, TEXT("send reuest: %s"), *string);
-		SendData(string);
+	//	////4. TI -> TI
+	//	string += "TI";
+	//	CurrentTime = FDateTime::UtcNow();
+	//	CurrentTime = AddTime(CurrentTime, 0.1);
+	//	string += *CurrentTime.ToString();
 
-		////// 첫 번째 요청 후 응답 대기
-		////if (bFirstTick)
-		////{
-		////	UE_LOG(LogTemp, Log, TEXT("Waiting for response after first data send..."));
-		////	FPlatformProcess::Sleep(5.0f);
-		////	bFirstTick = false;
-		////}
+	//	UE_LOG(LogTemp, Log, TEXT("send reuest: %s"), *string);
+	//	SendData(string);
 
-		FString Response = ReceiveData();
+	//	FString Response = ReceiveData();
 
-		UE_LOG(LogTemp, Log, TEXT("Received response len: %d"), Response.Len());
+	//	UE_LOG(LogTemp, Log, TEXT("Received response len: %d"), Response.Len());
 
 
-	/*	uint8 i = 0;
-		while (i < 30)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Received response len: %c"), Response[i]); 
-			i++;
-		}*/
-		
-		//UE_LOG(LogTemp, Log, TEXT("parse string : %s"), *string);
-		//UE_LOG(LogTemp, Log, TEXT("Received response: %s"), *Response);
-	}
+	///*	uint8 i = 0;
+	//	while (i < 30)
+	//	{
+	//		UE_LOG(LogTemp, Log, TEXT("Received response len: %c"), Response[i]); 
+	//		i++;
+	//	}*/
+	//	
+	//	//UE_LOG(LogTemp, Log, TEXT("parse string : %s"), *string);
+	//	//UE_LOG(LogTemp, Log, TEXT("Received response: %s"), *Response);
+	//}
+
+	//---------------------------
 
 	// PlayerLocation value print -
 	//PrintPlayerLocation();
@@ -450,6 +451,7 @@ void AProtocolLibrary::ParsingReceiveData(FString& ParsedData, const TArray<uint
 
 	UE_LOG(LogTemp, Log, TEXT("---------- Now String length: %d | val: %s"), ParsedData.GetAllocatedSize(), *ParsedData);
 }
+
 
 
 
