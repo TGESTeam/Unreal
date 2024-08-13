@@ -37,9 +37,13 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* VoxelMesh;
 
+	// CO2 value (for visualization)
+	void SetCO2Value(float CO2Value);
 
 	// Gameplay Tags
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")
 	FGameplayTagContainer GameplayTags;
 
+private:
+	UMaterialInstanceDynamic* VoxelMaterial;
 };

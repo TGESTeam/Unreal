@@ -34,6 +34,18 @@ AVoxel_one::AVoxel_one()
     }
 
 
+
+
+    // Create a dynamic material instance
+    VoxelMaterial = UMaterialInstanceDynamic::Create(VoxelMesh->GetMaterial(0), this);
+    if (VoxelMaterial)
+    {
+        VoxelMesh->SetMaterial(0, VoxelMaterial);
+    }
+
+
+    
+
     // Calculate scale based on the desired size in cm
     FVector Scale = VoxelSize / 100.0f;
     VoxelMesh->SetWorldScale3D(Scale);
@@ -51,5 +63,17 @@ void AVoxel_one::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+}
+
+
+// Set the CO2 value and update the material
+void AVoxel_one::SetCO2Value(float CO2Value)
+{
+    if (VoxelMaterial)
+    {
+        // Assuming you have a material parameter called "CO2Value" to control the color or some other visual property
+        FLinearColor VoxelColor = FLinearColor::LerpUsingHSV(FLinearColor::Blue, FLinearColor::Red, CO2Value);
+        VoxelMaterial->SetScalarParameterValue(TEXT("CO2Value"), CO2Value);
+    }
 }
 

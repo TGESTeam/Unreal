@@ -10,11 +10,15 @@
 #include "Engine/LocalPlayer.h"
 #include "ProtocolLibrary.h"
 #include <Kismet/GameplayStatics.h>
+#include "Voxel_one.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
-AUnrealClientCharacter::AUnrealClientCharacter()
+AUnrealClientCharacter::AUnrealClientCharacter() 
 {
+	UE_LOG(LogTemp, Warning, TEXT("HelloHello"));
+	//Voxel 그리드 크기와 간격 설정
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
@@ -31,6 +35,10 @@ AUnrealClientCharacter::AUnrealClientCharacter()
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+
+
+
 }
 
 void AUnrealClientCharacter::BeginPlay()
@@ -38,12 +46,26 @@ void AUnrealClientCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	// ProtocolLibrary 싱글톤 인스턴스 가져오기
-	ProtocolLibraryInstance = AProtocolLibrary::GetInstance(GetWorld());
-	if (!ProtocolLibraryInstance)
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("Failed to get ProtocolLibrary instance."));
-	}
+	//VoxelGridSize = 20;
+	////VoxelSpacing = 100.0f; // Voxel 간의 거리
+	//// ProtocolLibrary 싱글톤 인스턴스 가져오기
+	//ProtocolLibraryInstance = AProtocolLibrary::GetInstance(GetWorld());
+	//if (!ProtocolLibraryInstance)
+	//{
+	//	UE_LOG(LogTemplateCharacter, Error, TEXT("Failed to get ProtocolLibrary instance."));
+
+	//}
+
+
+
+	// Voxel 그리드를 생성합니다.
+	//CreateVoxelGrid();
+
+
+	// CO2 데이터를 생성하고 적용합니다.
+	//GenerateCO2Data();
+
+
 
 	/*
 	// --------- CPP <-- Python으로 데이터 받을 때 SL 해석 테스트 [Start] -----------
@@ -127,6 +149,9 @@ void AUnrealClientCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
 	}
+
+	// 플레이어가 움직일 때마다 복셀을 업데이트
+	//UpdateVoxels();
 }
 
 void AUnrealClientCharacter::Look(const FInputActionValue& Value)
@@ -146,31 +171,122 @@ void AUnrealClientCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (ProtocolLibraryInstance)
-	{
-		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
-		if (PlayerCharacter)
-		{
-			//Player Location
-			FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+	//if (ProtocolLibraryInstance)
+	//{
+	//	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+	//	if (PlayerCharacter)
+	//	{
+	//		//Player Location
+	//		FVector PlayerLocation = PlayerCharacter->GetActorLocation();
 
-			//ProtocolLibrary singleton instance LOVector change Value
-			ProtocolLibraryInstance->PlayerLocation.X = PlayerLocation.X;
-			ProtocolLibraryInstance->PlayerLocation.Y = PlayerLocation.Y;
-			ProtocolLibraryInstance->PlayerLocation.Z = PlayerLocation.Z;
+	//		//ProtocolLibrary singleton instance LOVector change Value
+	//		ProtocolLibraryInstance->PlayerLocation.X = PlayerLocation.X;
+	//		ProtocolLibraryInstance->PlayerLocation.Y = PlayerLocation.Y;
+	//		ProtocolLibraryInstance->PlayerLocation.Z = PlayerLocation.Z;
 
-			//PlayerViewdirection
-			FRotator PlayerDirection = PlayerCharacter->GetActorRotation();
-			//ProtocolLibrary singleton instance ROVector change Value
-			ProtocolLibraryInstance->PlayerViewDirection.Pitch = PlayerDirection.Pitch;
-			ProtocolLibraryInstance->PlayerViewDirection.Yaw = PlayerDirection.Yaw;
-			ProtocolLibraryInstance->PlayerViewDirection.Roll = PlayerDirection.Roll;
+	//		//PlayerViewdirection
+	//		FRotator PlayerDirection = PlayerCharacter->GetActorRotation();
+	//		//ProtocolLibrary singleton instance ROVector change Value
+	//		ProtocolLibraryInstance->PlayerViewDirection.Pitch = PlayerDirection.Pitch;
+	//		ProtocolLibraryInstance->PlayerViewDirection.Yaw = PlayerDirection.Yaw;
+	//		ProtocolLibraryInstance->PlayerViewDirection.Roll = PlayerDirection.Roll;
 
-			/*UE_LOG(LogTemp, Log, TEXT("Player Location Updated: %lf, %lf, %lf"), PlayerLocation.X, PlayerLocation.Y, PlayerLocation.Z);*/
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Warning, TEXT("ProtocolLibraryInstance is null."));
-	}
+	//		/*UE_LOG(LogTemp, Log, TEXT("Player Location Updated: %lf, %lf, %lf"), PlayerLocation.X, PlayerLocation.Y, PlayerLocation.Z);*/
+	//	}
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemplateCharacter, Warning, TEXT("ProtocolLibraryInstance is null."));
+	//}
+
+
+
+	// Voxel 그리드의 위치를 업데이트합니다.
+	//UpdateVoxelGrid();
 }
+
+
+
+//void AUnrealClientCharacter::CreateVoxelGrid()
+//{
+//	FVector ForwardVector = FirstPersonCameraComponent->GetForwardVector();
+//	FVector Origin = FirstPersonCameraComponent->GetComponentLocation() + ForwardVector * 500.0f; // 캐릭터 앞 500 단위 위치
+//
+//	// 그리드의 시작점을 계산
+//	FVector GridStart = Origin - FVector(VoxelGridSize / 2 * VoxelSpacing, VoxelGridSize / 2 * VoxelSpacing, 0);
+//
+//	for (int32 x = 0; x < VoxelGridSize; x++)
+//	{
+//		for (int32 y = 0; y < VoxelGridSize; y++)
+//		{
+//			// Voxel 위치 계산
+//			FVector VoxelPosition = GridStart + FVector(x * VoxelSpacing, y * VoxelSpacing, 0);
+//
+//			// Voxel_one 액터를 생성합니다.
+//			AVoxel_one* NewVoxel = GetWorld()->SpawnActor<AVoxel_one>(VoxelPosition, FRotator::ZeroRotator);
+//			if (NewVoxel)
+//			{
+//				VoxelGrid.Add(NewVoxel);
+//			}
+//		}
+//	}
+//}
+//
+//
+//void AUnrealClientCharacter::UpdateVoxelGrid()
+//{
+//	FVector ForwardVector = FirstPersonCameraComponent->GetForwardVector();
+//	FVector Origin = FirstPersonCameraComponent->GetComponentLocation() + ForwardVector * 500.0f; // 캐릭터 앞 500 단위 위치
+//
+//	// 그리드의 시작점을 계산
+//	FVector GridStart = Origin - FVector(VoxelGridSize / 2 * VoxelSpacing, VoxelGridSize / 2 * VoxelSpacing, 0);
+//
+//	// Voxel 위치 업데이트
+//	for (int32 x = 0; x < VoxelGridSize; x++)
+//	{
+//		for (int32 y = 0; y < VoxelGridSize; y++)
+//		{
+//			int32 Index = x * VoxelGridSize + y;
+//			if (VoxelGrid.IsValidIndex(Index))
+//			{
+//				FVector VoxelPosition = GridStart + FVector(x * VoxelSpacing, y * VoxelSpacing, 0);
+//				VoxelGrid[Index]->SetActorLocation(VoxelPosition);
+//			}
+//		}
+//	}
+//}
+//
+//void AUnrealClientCharacter::ApplyCO2Data(const TArray<float>& CO2Values)
+//{
+//	int32 Index = 0;
+//	for (AVoxel_one* Voxel : VoxelGrid)
+//	{
+//		if (Voxel && CO2Values.IsValidIndex(Index))
+//		{
+//			// Voxel의 머티리얼에 이산화탄소 값을 적용합니다.
+//			Voxel->SetCO2Value(CO2Values[Index]);
+//			Index++;
+//		}
+//	}
+//}
+//
+//
+//void AUnrealClientCharacter::GenerateCO2Data()
+//{
+//	TArray<float> CO2Values;
+//
+//	// Voxel의 개수만큼 CO2 값을 생성
+//	for (int32 i = 0; i < VoxelGridSize * VoxelGridSize; i++)
+//	{
+//		// 0.0f에서 1.0f 사이의 랜덤 값을 생성하여 CO2Values 배열에 추가
+//		float RandomCO2Value = FMath::FRand(); // 0.0f에서 1.0f 사이의 랜덤 값
+//		CO2Values.Add(RandomCO2Value);
+//	}
+//
+//	// 생성된 CO2 데이터를 ApplyCO2Data 함수로 전달하여 적용
+//	ApplyCO2Data(CO2Values);
+//}
+
+
+
+
