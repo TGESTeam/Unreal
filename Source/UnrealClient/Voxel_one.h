@@ -8,23 +8,21 @@
 #include "GameplayTagsManager.h"
 #include "Voxel_one.generated.h"
 
-
 UCLASS()
 class UNREALCLIENT_API AVoxel_one : public AActor
 {
 	GENERATED_BODY()
-
-public:
+	
+public:	
 	// Sets default values for this actor's properties
 	AVoxel_one();
 
 	FVector Dimensions = FVector(1633.0f, 1809.0f, 2014.0f);
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
+public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -37,9 +35,13 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* VoxelMesh;
 
+	// CO2 value (for visualization)
+	void SetCO2Value(float CO2Value);
 
 	// Gameplay Tags
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")
 	FGameplayTagContainer GameplayTags;
 
+//private:
+//	UMaterialInstanceDynamic* VoxelMaterial;
 };

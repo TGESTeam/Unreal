@@ -5,15 +5,11 @@
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
-
-
 // Sets default values
 AVoxel_one::AVoxel_one()
 {
-    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-    PrimaryActorTick.bCanEverTick = true;
-
-
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
     int32 NumX = 85;
     int32 NumY = 93;
     int32 NumZ = 101;
@@ -33,7 +29,12 @@ AVoxel_one::AVoxel_one()
         VoxelMesh->SetStaticMesh(VoxelMeshAsset.Object);
     }
 
-
+    //// Create a dynamic material instance
+    //VoxelMaterial = UMaterialInstanceDynamic::Create(VoxelMesh->GetMaterial(0), this);
+    //if (VoxelMaterial)
+    //{
+    //    VoxelMesh->SetMaterial(0, VoxelMaterial);
+    //}
     // Calculate scale based on the desired size in cm
     FVector Scale = VoxelSize / 100.0f;
     VoxelMesh->SetWorldScale3D(Scale);
@@ -42,14 +43,13 @@ AVoxel_one::AVoxel_one()
 // Called when the game starts or when spawned
 void AVoxel_one::BeginPlay()
 {
-    Super::BeginPlay();
-
+	Super::BeginPlay();
+	
 }
 
 // Called every frame
 void AVoxel_one::Tick(float DeltaTime)
 {
-    Super::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
 }
-
